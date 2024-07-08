@@ -16,8 +16,12 @@ app.use(cookieParser());
 
 // importing the routes
 import userRoutes from "./routes/user.routes.js"
+import reviewRouter from "./routes/review.routes.js"
+import contactRoutes from "./routes/contact.routes.js"
 
 app.use("/api/v1/users", userRoutes)
+app.use("/api/v1/contact", contactRoutes)
+app.use("/api/v1/review", reviewRouter)
 
 
 
