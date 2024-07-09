@@ -24,14 +24,7 @@ const userSchema = new Schema({
         type: String,
         required: true,
     },
-    checkInTime: {
-        type: Date,
-        default: null, // Default value if not set
-    },
-    checkOutTime: {
-        type: Date,
-        default: null, // Default value if not set
-    },
+
     refreshToken: {
         type: String
     }

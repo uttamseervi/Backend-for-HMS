@@ -4,7 +4,19 @@ const roomSchema = new Schema({
     roomType: {
         type: String,
         required: true,
-        enum: ['Presidential Suite', 'Executive Suite', 'Luxury Suite', 'Premium Room'], // Example of enum for room types
+        enum: ['Presidential Suite', 'Luxury Suite', 'Premium Room'], // Example of enum for room types
+    },
+    roomImage: {
+        type: String,
+        required: true
+    },
+    title: {
+        type: String,
+        required: true  //some name to the room
+    },
+    roomInfo: {
+        type: String,
+        required: true  //like it is single bed one or two bed one
     },
     cost: {
         type: Number,
@@ -17,13 +29,13 @@ const roomSchema = new Schema({
         default: null, // Default value if the room is not allocated
     },
     checkInTime: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
+        type: Date,
+        default: null, // Default value if not set
     },
     checkOutTime: {
-        type:Schema.Types.ObjectId,
-        ref:'User',
-    }
+        type: Date,
+        default: null, // Default value if not set
+    },
 }, {
     timestamps: true // Adds createdAt and updatedAt fields
 });

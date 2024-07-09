@@ -18,10 +18,19 @@ app.use(cookieParser());
 import userRoutes from "./routes/user.routes.js"
 import reviewRouter from "./routes/review.routes.js"
 import contactRoutes from "./routes/contact.routes.js"
+import roomRoutes from "./routes/room.routes.js"
+import departmentRoutes from "./routes/department.routes.js"
+import employeeRoutes from "./routes/employee.routes.js"
 
+
+// using these routes
 app.use("/api/v1/users", userRoutes)
 app.use("/api/v1/contact", contactRoutes)
 app.use("/api/v1/review", reviewRouter)
+// testing is pending from here 
+app.use("/api/v1/department", departmentRoutes)
+app.use("/api/v1/employee", employeeRoutes)
+app.use("/api/v1/rooms", roomRoutes)
 
 
 
