@@ -1,7 +1,9 @@
 import mongoose, { Schema } from "mongoose";
-import bcrypt from "bcrypt"
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
 const adminSchema = new Schema({
-    userName: {
+    username: {
         type: String,
         required: true,
     },
@@ -16,19 +18,25 @@ const adminSchema = new Schema({
     refreshToken: {
         type: String,
     }
+}, { timestamps: true });
 
-}, { timestamps: true })
+adminSchema.pre("save", async function(next) {
+    if (!this.isModified("password")) return next();
+    try {
+        const hashedPassword = await bcrypt.hash(this.password, 10);
+        this.password = hashedPassword;
+        next();
+    } catch (error) {
+        next(error);
+    }
+});
 
-adminSchema.pre("save", async (next) => {
-    if (!isModified("password")) return next();
-    this.password = await bcrypt.hash(this.password, 10);
-    next();
-})
-adminSchema.methods.isPasswordCorrect = async (password) => {
-    return await bcrypt.compare(password, this.password)
-}
-adminSchema.methods.generateAccessToken = async () => {
-    return JsonWebTokenError.sign(
+adminSchema.methods.isPasswordCorrect = async function(password) {
+    return await bcrypt.compare(password, this.password);
+};
+
+adminSchema.methods.generateAccessToken = function() {
+    return jwt.sign(
         {
             _id: this._id,
             email: this.email,
@@ -37,10 +45,11 @@ adminSchema.methods.generateAccessToken = async () => {
         {
             expiresIn: process.env.ADMIN_ACCESS_TOKEN_EXPIRY
         }
-    )
-}
-adminSchema.methods.generateRefreshToken = async () => {
-    return JsonWebTokenError.sign(
+    );
+};
+
+adminSchema.methods.generateRefreshToken = function() {
+    return jwt.sign(
         {
             _id: this._id,
             email: this.email,
@@ -49,8 +58,8 @@ adminSchema.methods.generateRefreshToken = async () => {
         {
             expiresIn: process.env.ADMIN_REFRESH_TOKEN_EXPIRY
         }
-    )
-}
+    );
+};
 
-const Admin = mongoose.model("Admin", adminSchema)
-export default Admin
+const Admin = mongoose.model("Admin", adminSchema);
+export default Admin;

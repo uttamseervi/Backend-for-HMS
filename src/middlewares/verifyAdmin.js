@@ -3,8 +3,8 @@ import { ApiError } from "../utils/apiError.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 import Admin from "../models/admin.models.js"
 
-const verifyAdmin = async () => {
-    const token = req.cookie.accessToken || req.header("Authorization").replace("Bearer ", "")
+const verifyAdmin = async (req,res,next) => {
+    const token = req.cookies.accessToken || req.header("Authorization").replace("Bearer ", "")
     if (!token) throw new ApiError(400, "Invalid Access Token ");
     try {
         const decodedToken = jwt.verify(token, process.env.ADMIN_ACCESS_TOKEN_SECRET);
