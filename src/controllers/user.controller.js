@@ -1,7 +1,9 @@
+import Room from "../models/room.models.js"
 import User from "../models/user.models.js"
 import { asyncHandler } from "../utils/asyncHandler.js"
 import { ApiResponse } from "../utils/apiResponse.js"
 import { ApiError } from "../utils/apiError.js"
+import { isValidObjectId } from "mongoose"
 
 const generateTokens = async (userId) => {
     try {
@@ -64,6 +66,54 @@ const loginUser = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, loggedInUser, "User logged in Successfully"))
 })
 
+/*const allocateRoom = asyncHandler(async (req, res) => {
+    const { roomID } = req.params;
+    const user = req.user
+
+    const loggedInUser = await User.findById(isValidObjectId(user._id));
+    const room = await Room.findById(isValidObjectId(roomId));
+
+    if (!user) throw new ApiError(400, "User not found");
+    if (!room) throw new ApiError(500, "Failed to find the room");
+
+    loggedInUser.allocatedRoom = room._id
+    room.allocatedTo = loggedInUser._id
+    await loggedInUser.save();
+    await room.save();
+
+
+    return res
+        .status(200)
+        .json(200, { loggedInUser, room }, "Room allocated Successfully")
+})
+*/
+const allocateRoom = asyncHandler(async (req, res) => {
+    const { roomId } = req.params;
+    const user = req.user;
+    // TODO: YOU STILL HAVE TO TAKE THE CHECK-IN TIME AND CHECK-OUT TIME
+    if (!isValidObjectId(roomId)) {
+        throw new ApiError(400, "Invalid ObjectId format");
+    }
+
+    const loggedInUser = await User.findById(user._id);
+    if (!loggedInUser) {
+        throw new ApiError(400, "User not found");
+    }
+
+    const room = await Room.findById(roomId);
+    if (!room) {
+        throw new ApiError(404, "Room not found");
+    }
+
+    loggedInUser.allocatedRoom = room._id;
+    room.allocatedTo = loggedInUser._id;
+
+    await loggedInUser.save();
+    await room.save();
+
+    return res.status(200).json(new ApiResponse(200, { loggedInUser, room }, "Room allocated successfully"));
+});
+
 const logoutUser = asyncHandler(async (req, res) => {
     const user = await User.findByIdAndUpdate(
         req.user._id,
@@ -90,4 +140,4 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 
 
-export { createUser, loginUser, logoutUser }
+export { createUser, loginUser, logoutUser, allocateRoom }

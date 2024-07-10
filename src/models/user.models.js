@@ -24,7 +24,10 @@ const userSchema = new Schema({
         type: String,
         required: true,
     },
-
+    allocatedRoom: {
+        type: Schema.Types.ObjectId,
+        ref: 'Room'
+    },
     refreshToken: {
         type: String
     }

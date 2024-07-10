@@ -18,6 +18,9 @@ const serviceSchema = new Schema({
         type: String,
         required: true,
     },
+    timeSlots: {
+        type: String,
+    },
     requestedBy: {
         type: Schema.Types.ObjectId,
         ref: 'User',

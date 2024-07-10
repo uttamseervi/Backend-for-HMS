@@ -4,7 +4,7 @@ const roomSchema = new Schema({
     roomType: {
         type: String,
         required: true,
-        enum: ['Presidential Suite', 'Luxury Suite', 'Premium Room'], // Example of enum for room types
+        // enum: ['Presidential Suite', 'Luxury Suite', 'Premium Room'], // Example of enum for room types
     },
     roomImage: {
         type: String,

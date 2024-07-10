@@ -6,8 +6,9 @@ import { ApiResponse } from "../utils/apiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
 
 const createRoom = asyncHandler(async (req, res) => {
-    const { roomType, cost, roomImage, title, roomInfo } = req.body;
-    if ([roomType, cost, roomImage, title, roomInfo].some((field) => !field || field.trim() === "")) throw new ApiError(500, "All the fields are required");
+    const { cost, roomImage, title, roomInfo, roomType } = req.body;
+    // the below line is not working please check it later
+    // if ([cost, roomImage, title, roomInfo, roomType].some((field) => !field || field.trim() === "")) throw new ApiError(400, "All the fields are compulsory");
     const existedRoom = await Room.findOne({ title });
     if (existedRoom) throw new ApiError(400, "Room with this title already exists");
 
@@ -44,13 +45,4 @@ const deleteRoom = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "Room deleted successfully"));
 });
 
-const allocateRoom = asyncHandler(async (req, res) => {
-    const { roomId } = req.params;
-    if (!roomId || !mongoose.isValidObjectId(roomId)) throw new ApiError(400, "Invalid room ID");
-    // Add logic to allocate room
-    return res
-        .status(200)
-        .json(new ApiResponse(200, {}, "Room allocated successfully"));
-});
-
-export { createRoom, deleteRoom, allocateRoom };
+export { createRoom, deleteRoom };
