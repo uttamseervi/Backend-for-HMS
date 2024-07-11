@@ -21,10 +21,10 @@ const employeeSchema = new Schema({
         type:String,
         required: true,
     },
-    department: {
+    departmentName: {
         type: String,
         enum: ['Housekeeping', 'Front Desk', 'Maintenance', 'Food and Beverage', 'Administration'],
-        required: true
+        // required: true
     },
     salary: {
         type: Number,

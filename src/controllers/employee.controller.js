@@ -2,11 +2,11 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import Employee from "../models/employee.models.js";
-import mongoose from 'mongoose';
+import mongoose, { isValidObjectId } from 'mongoose';
 
 const createEmployee = asyncHandler(async (req, res) => {
-    const { name, age, gender, department, designation, email, salary } = req.body;
-    if ([name, age, gender, department, designation, email, salary].some((field) => !field || field.trim() === "")) {
+    const { departmentName, name, age, gender, designation, email, salary } = req.body;
+    if ([departmentName, name, age, gender, designation, email, salary].some((field) => !field || field.trim() === "")) {
         throw new ApiError(400, "All the fields are compulsory");
     }
 
@@ -14,7 +14,7 @@ const createEmployee = asyncHandler(async (req, res) => {
         name,
         age,
         gender,
-        department,
+        departmentName,
         designation,
         email,
         salary
@@ -37,8 +37,33 @@ const deleteEmployee = asyncHandler(async (req, res) => {
         .status(200)
         .json(new ApiResponse(200, {}, "Employee deleted Successfully"));
 });
+const assignDepartment = asyncHandler(async (req, res) => {
+    const { departmentName } = req.body;
+    const { employeeId } = req.params;
+
+    if (!departmentName || !employeeId) {
+        throw new ApiError(400, "All the fields are required");
+    }
+
+    if (!isValidObjectId(employeeId)) {
+        throw new ApiError(400, "Invalid employee ID");
+    }
+
+    const employee = await Employee.findById(employeeId);
+    if (!employee) {
+        throw new ApiError(400, "Employee not found");
+    }
+
+    employee.department = departmentName;
+    await employee.save();
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, employee, "Department assigned Successfully"));
+});
 
 export {
     createEmployee,
-    deleteEmployee
+    deleteEmployee,
+    assignDepartment
 };
