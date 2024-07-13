@@ -7,11 +7,11 @@ const departmentSchema = new Schema({
         type: String,
         required: true,
     },
-    numberOfEmployees: {
-        type: Number,
-        // required: true,
-        default: 0,
+    employeeId: {
+        type: Schema.Types.ObjectId,
+        ref: "Employee"
     },
+
 }, { timestamps: true });
 
 const Department = mongoose.model("Department", departmentSchema);

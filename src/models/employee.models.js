@@ -13,18 +13,18 @@ const employeeSchema = new Schema({
         type: Number,
         required: true,
     },
-    designation:{
+    designation: {
         type: String,
         required: true,
     },
-    gender:{
-        type:String,
+    gender: {
+        type: String,
         required: true,
     },
-    departmentName: {
-        type: String,
-        enum: ['Housekeeping', 'Front Desk', 'Maintenance', 'Food and Beverage', 'Administration'],
-        // required: true
+    departmentId: {
+        type: Schema.Types.ObjectId,
+        ref: "Department"
+
     },
     salary: {
         type: Number,

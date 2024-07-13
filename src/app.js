@@ -30,10 +30,10 @@ app.use("/api/v1/users", userRoutes)
 app.use("/api/v1/contact", contactRoutes)
 app.use("/api/v1/review", reviewRouter)
 app.use("/api/v1/admin", adminRoutes)
-
-// testing is pending from here 
 app.use("/api/v1/department", departmentRoutes)
 app.use("/api/v1/employee", employeeRoutes)
+
+// testing is pending from here 
 app.use("/api/v1/rooms", roomRoutes)
 
 

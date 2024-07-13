@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import Department from "../models/department.models.js";
+import Employee from "../models/employee.models.js"
 import mongoose from "mongoose";
 
 const createDepartment = asyncHandler(async (req, res) => {
@@ -19,13 +20,42 @@ const createDepartment = asyncHandler(async (req, res) => {
 });
 
 const getAllDepartments = asyncHandler(async (req, res) => {
+    // Fetch all departments
     const departments = await Department.find();
-    if (!departments || departments.length === 0) throw new ApiError(500, "Failed to fetch all the departments");
+    if (!departments || departments.length === 0) {
+        throw new ApiError(500, "Failed to fetch all the departments");
+    }
 
-    return res
-        .status(200)
-        .json(new ApiResponse(200, departments, "All the departments are fetched successfully"));
+    // Aggregate to get employee counts per department
+    const employeeCount = await Employee.aggregate([
+        {
+            $lookup: {
+                from: "departments",
+                localField: "departmentId",
+                foreignField: "_id",
+                as: "result"
+            }
+        },
+        {
+            $unwind: "$result"
+        },
+        {
+            $group: {
+                _id: "$result.departmentName",
+                totalEmployees: { $sum: 1 }
+            }
+        },
+    ]);
+    console.log(employeeCount)
+    // Check if employeeCount has data
+    if (!employeeCount || employeeCount.length === 0) {
+        throw new ApiError(400, "Failed to fetch the employee counts");
+    }
+
+    
+    return res.status(200).json(new ApiResponse(200, { departments, employeeCount }, "All departments and employee counts fetched successfully"));
 });
+
 
 const deleteDepartment = asyncHandler(async (req, res) => {
     const { deptId } = req.params;
