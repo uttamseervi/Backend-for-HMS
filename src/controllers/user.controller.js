@@ -50,8 +50,8 @@ const loginUser = asyncHandler(async (req, res) => {
     if (!isPasswordValid) throw new ApiError(400, "Password is Incorrect")
 
     const { accessToken, refreshToken } = await generateTokens(user._id);
-    console.log("AccessToken is: ", accessToken)
-    console.log("RefreshToken is: ", refreshToken)
+    // console.log("AccessToken is: ", accessToken)
+    // console.log("RefreshToken is: ", refreshToken)
 
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
     const options = {

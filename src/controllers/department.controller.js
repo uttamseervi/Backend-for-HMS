@@ -46,14 +46,14 @@ const getAllDepartments = asyncHandler(async (req, res) => {
             }
         },
     ]);
-    console.log(employeeCount)
+    // console.log(employeeCount)
     // Check if employeeCount has data
     if (!employeeCount || employeeCount.length === 0) {
         throw new ApiError(400, "Failed to fetch the employee counts");
     }
 
-    
-    return res.status(200).json(new ApiResponse(200, { departments, employeeCount }, "All departments and employee counts fetched successfully"));
+
+    return res.status(200).json(new ApiResponse(200, { employeeCount }, "All departments and employee counts fetched successfully"));
 });
 
 

@@ -5,50 +5,53 @@ import { ApiResponse } from "../utils/apiResponse.js";
 import { ApiError } from "../utils/apiError.js";
 
 const paymentInfo = asyncHandler(async (req, res, next) => {
-    const user = req.user;
-    const loggedInUser = await User.findById(user._id);
-    // Fetch the room details using an aggregation pipeline
-    const roomDetails = await User.aggregate([
-        {
-            $match: { _id: loggedInUser._id }
-        },
-        {
-            $lookup: {
-                from: "rooms",
-                localField: "allocatedRoom",
-                foreignField: "_id",
-                as: "userRoomDetails"
-            }
-        },
-        {
-            $unwind: "$userRoomDetails"
-        },
-        {
-            $addFields: {
-                roomInfo: "$userRoomDetails"
-            }
-        }
-    ]);
-
-    // Check if room details were found
-    if (!roomDetails || roomDetails.length === 0) {
-        throw new ApiError(404, "Failed to fetch room details");
+  const user = req.user;
+  const loggedInUser = await User.findById(user._id);
+  // Fetch the room details using an aggregation pipeline
+  const roomDetails = await User.aggregate([
+    {
+      $match: { _id: loggedInUser._id }
+    },
+    {
+      $lookup: {
+        from: "rooms",
+        localField: "allocatedRoom",
+        foreignField: "_id",
+        as: "userRoomDetails"
+      }
+    },
+    {
+      $unwind: "$userRoomDetails"
+    },
+    {
+      $addFields: {
+        roomInfo: "$userRoomDetails"
+      }
     }
+  ]);
 
-    const roomInfo = roomDetails[0].roomInfo;
-    const roomPrice = roomInfo.cost;
+  // Check if room details were found
+  if (!roomDetails || roomDetails.length === 0) {
+    throw new ApiError(404, "Failed to fetch room details");
+  }
 
-    if (!roomPrice) {
-        throw new ApiError(500, "Failed to fetch the price of the room");
-    }
+  const roomInfo = roomDetails[0].roomInfo;
+  const roomPrice = roomInfo.cost;
 
-    return res
-        .status(200)
-        .json(new ApiResponse(200, { roomInfo, roomPrice }, "Room price fetched successfully"));
+  console.log(roomDetails)
+  console.log("roomInfo", roomInfo);
+  console.log("roomPrice", roomPrice)
+  if (!roomPrice) {
+    throw new ApiError(500, "Failed to fetch the price of the room");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { roomInfo, roomPrice }, "Room price fetched successfully"));
 });
 
 export {
-    paymentInfo
+  paymentInfo
 };
 
 /*
