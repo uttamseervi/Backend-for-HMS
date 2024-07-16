@@ -5,10 +5,11 @@ import { ApiError } from "../utils/apiError.js";
 
 const createContact = asyncHandler(async (req, res) => {
     const { firstName, lastName, email, phoneNumber, message } = req.body;
+    console.log(firstName,lastName,email,phoneNumber,message)
 
-    if ([firstName, lastName, email, phoneNumber, message].some((field) => !field || field.trim() === "")) {
-        throw new ApiError(400, "All the fields are compulsory");
-    }
+    // if ([firstName, lastName, email, phoneNumber, message].some((field) => !field || field.trim() === "")) {
+    //     throw new ApiError(400, "All the fields are compulsory");
+    // }
 
     const contact = await Contact.create({
         firstName,

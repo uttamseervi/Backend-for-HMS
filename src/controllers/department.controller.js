@@ -27,25 +27,33 @@ const getAllDepartments = asyncHandler(async (req, res) => {
     }
 
     // Aggregate to get employee counts per department
-    const employeeCount = await Employee.aggregate([
-        {
-            $lookup: {
-                from: "departments",
-                localField: "departmentId",
-                foreignField: "_id",
-                as: "result"
+    const employeeCount = await Employee.aggregate(
+        [
+            {
+                $lookup: {
+                    from: "departments",
+                    localField: "departmentId",
+                    foreignField: "_id",
+                    as: "result"
+                }
+            },
+            {
+                $group: {
+                    _id: "$result.departmentName",
+                    totalEmp: {
+                        $sum: 1
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    departmentName: {
+                        $first: "$_id"
+                    }
+                }
             }
-        },
-        {
-            $unwind: "$result"
-        },
-        {
-            $group: {
-                _id: "$result.departmentName",
-                totalEmployees: { $sum: 1 }
-            }
-        },
-    ]);
+        ]
+    );
     // console.log(employeeCount)
     // Check if employeeCount has data
     if (!employeeCount || employeeCount.length === 0) {
@@ -53,7 +61,7 @@ const getAllDepartments = asyncHandler(async (req, res) => {
     }
 
 
-    return res.status(200).json(new ApiResponse(200, { employeeCount }, "All departments and employee counts fetched successfully"));
+    return res.status(200).json(new ApiResponse(200, { departments, employeeCount }, "All departments and employee counts fetched successfully"));
 });
 
 

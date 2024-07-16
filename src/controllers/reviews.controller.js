@@ -23,5 +23,22 @@ const createReview = asyncHandler(async (req, res) => {
 
     return res.status(200).json(new ApiResponse(200, review, "Review created Successfully"));
 });
+const getAllReviews = asyncHandler(async (req, res, next) => {
+    try {
+        const reviews = await Review.find();
+        if (!reviews || reviews.length === 0) {
+            return next(new ApiError(404, "No reviews found"));
+        }
+        return res
+            .status(200)
+            .json(new ApiResponse(200, reviews, "Reviews fetched successfully"));
+    } catch (error) {
+        return next(new ApiError(500, "Failed to fetch the reviews"));
+    }
+});
 
-export { createReview };
+
+export {
+    createReview,
+    getAllReviews
+};

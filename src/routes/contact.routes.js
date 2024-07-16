@@ -4,6 +4,6 @@ import { verifyJwt } from "../middlewares/auth.middleware.js"
 
 const router = Router();
 
-router.route("/send-message").post(verifyJwt, createContact)
+router.route("/send-message").post(createContact)
 
 export default router;
