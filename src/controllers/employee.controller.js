@@ -8,6 +8,7 @@ import mongoose, { isValidObjectId } from 'mongoose';
 
 const createEmployee = asyncHandler(async (req, res) => {
     const { departmentId, name, age, gender, designation, email, salary } = req.body;
+    // console.log([departmentId, name, age, gender, designation, email, salary])
     if ([departmentId, name, age, gender, designation, email, salary].some((field) => !field || field.trim() === "")) {
         throw new ApiError(400, "All the fields are compulsory");
     }
@@ -21,6 +22,7 @@ const createEmployee = asyncHandler(async (req, res) => {
         email,
         salary
     });
+    // console.log(employee)
     if (!employee) throw new ApiError(400, "Failed to create the Employee");
 
     return res

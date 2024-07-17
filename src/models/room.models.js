@@ -10,13 +10,9 @@ const roomSchema = new Schema({
         type: String,
         required: true
     },
-    title: {
-        type: String,
-        required: true  //some name to the room
-    },
     roomInfo: {
         type: String,
-        required: true  //like it is single bed one or two bed one
+        required: true
     },
     cost: {
         type: Number,
