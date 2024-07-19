@@ -131,34 +131,34 @@ const allocateRoom = async (req, res) => {
 };
 
 
+
 const deAllocateRoom = asyncHandler(async (req, res) => {
-    const user = req.user;
+    try {
+        const roomId = req.body.roomId;
+        const room = await Room.findById(roomId);
 
-    const loggedInUser = await User.findById(user._id);
-    if (!loggedInUser) {
-        throw new ApiError(400, "User not found");
+        if (!room) {
+            throw new ApiResponse(404, null, "Room not found");
+        }
+
+        const user = await User.findOne({ allocatedRoom: room._id });
+
+        if (user) {
+            user.allocatedRoom = null;
+            user.paymentId = null;
+            await user.save();
+        }
+
+        room.allocatedTo = null;
+        room.paymentId = null;
+        await room.save();
+
+        return res.status(200).json(new ApiResponse(200, room, "Room deallocated successfully"));
+    } catch (error) {
+        console.error(error);
+        throw new ApiResponse(500, null, "An error occurred while deallocating the room");
     }
-
-    const roomId = loggedInUser.allocatedRoom; // Get the room ID allocated to the user
-
-    if (!roomId || !isValidObjectId(roomId)) {
-        throw new ApiError(400, "Invalid Room ID");
-    }
-
-    const room = await Room.findById(roomId);
-    if (!room) {
-        throw new ApiError(404, "Room not found");
-    }
-
-    loggedInUser.allocatedRoom = null; // Remove allocated room from user
-    room.allocatedTo = null; // Remove user reference from room
-
-    await loggedInUser.save();
-    await room.save();
-
-    return res.status(200).json(new ApiResponse(200, { loggedInUser, room }, "Room deallocated successfully"));
 });
-
 
 const logoutUser = asyncHandler(async (req, res) => {
     const userId = req.user._id;

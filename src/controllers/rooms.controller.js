@@ -81,18 +81,49 @@ const findRoomById = asyncHandler(async (req, res) => {
 })
 const getAllRooms = asyncHandler(async (req, res) => {
     const rooms = await Room.find()
+
     if (!rooms || rooms.length === 0) throw new ApiError(400, "No rooms found");
     return res.status(200).json(new ApiResponse(200, rooms, "Rooms fetched successfully"));
 
 })
 
+
 const allocatedRooms = asyncHandler(async (req, res) => {
-    const rooms = await Room.find({ allocatedTo: { $ne: null } });
-    if (!rooms || rooms.length === 0) throw new ApiError(400, "Failed to fetch the allocated rooms");
-    return res
-        .status(200)
-        .json(new ApiResponse(200, rooms, "Allocated rooms fetched successfully"));
+    try {
+        const rooms = await Room.aggregate([
+            {
+                $match: { allocatedTo: { $ne: null } } 
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "allocatedTo",
+                    foreignField: "_id",
+                    as: "userInfo"
+                }
+            },
+            {
+                $unwind: "$userInfo"
+            }
+        ]);
+        console.log(rooms)
+
+        if (!rooms || rooms.length === 0) {
+            throw new ApiError(400, "Failed to fetch the allocated rooms");
+        }
+
+        return res
+            .status(200)
+            .json(new ApiResponse(200, rooms, "Allocated rooms fetched successfully"));
+    } catch (error) {
+        console.error(error);
+        return res
+            .status(500)
+            .json(new ApiResponse(500, null, "An error occurred while fetching allocated rooms"));
+    }
 });
+
+
 
 const unAllocatedRooms = asyncHandler(async (req, res) => {
     const rooms = await Room.find({ allocatedTo: null });
