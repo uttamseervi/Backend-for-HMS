@@ -6,6 +6,38 @@ import { ApiError } from "../utils/apiError.js";
 import Payment from "../models/payment.models.js";
 import { isValidObjectId } from "mongoose";
 
+
+const getAmountInfo = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  if (!userId || !isValidObjectId(userId)) throw new ApiError(400, "Failed to get the user");
+  const loggedInUser = await User.findById(userId);
+  if (!loggedInUser) throw new ApiError(400, "Failed to get the userInfo");
+  const room = await Room.findById(loggedInUser.allocatedRoom);
+  if (!room) throw new ApiError(400, "Failed to fetch the room Details");
+
+  const userRoom = await User.aggregate([
+    {
+      $match: { _id: userId }
+    },
+    {
+      $lookup: {
+        from: "rooms",
+        localField: "allocatedRoom",
+        foreignField: "_id",
+        as: "roomInfo"
+      }
+    },
+    {
+      $unwind: "$roomInfo"
+    }
+  ]);
+  return res
+    .status(200)
+    .json(new ApiResponse(200, userRoom, "Fetched the details of the user and room successfully"))
+
+})
+
+
 const createPayment = asyncHandler(async (req, res, next) => {
   const { cardType, cardNumber, month, year, cardCvv } = req.body;
   const user = req.user;
@@ -92,7 +124,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
     }
   ]);
 
-  
+
   const room = roomDetails[0].roomInfo
   const cost = room.cost;
 
@@ -105,5 +137,6 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
 
 export {
   createPayment,
-  getPaymentInfo
+  getPaymentInfo,
+  getAmountInfo
 };
