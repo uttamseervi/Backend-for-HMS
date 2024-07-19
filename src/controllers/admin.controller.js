@@ -21,22 +21,35 @@ const createAdmin = asyncHandler(async (req, res) => {
     if ([username, password, email].some((field) => field?.trim() === "")) {
         throw new ApiError(400, "All fields are compulsory");
     }
-    const existedAdmin = await Admin.findOne(
-        {
-            email
-        }
-    );
+    const existedAdmin = await Admin.findOne({ email });
     if (existedAdmin) throw new ApiError(400, "Admin already exists, please login.");
+
     const admin = await Admin.create({
         username,
         password,
         email,
     });
-    if (!admin) throw new ApiError(400, "failed to create the admin")
+    if (!admin) throw new ApiError(400, "Failed to create the admin");
+
+    const { accessToken, refreshToken } = await generateTokens(admin._id);
+    console.log("accessToken from the admin is: ",accessToken)
+    console.log("refreshToken  from the admin is: ",refreshToken)
+
+
     const createdAdmin = await Admin.findById(admin._id).select("-password -refreshToken");
+
+
     return res
         .status(200)
-        .json(new ApiResponse(200, createdAdmin, "Admin created Successfully"));
+        .cookie("accessToken", accessToken, {
+            httpOnly: true,
+            secure: true,
+        })
+        .cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: true,
+        })
+        .json(new ApiResponse(200, createdAdmin, "Admin created and logged in successfully"));
 });
 
 const loginAdmin = asyncHandler(async (req, res) => {
@@ -50,8 +63,8 @@ const loginAdmin = asyncHandler(async (req, res) => {
     if (!isPasswordValid) throw new ApiError(400, "Password is Incorrect");
 
     const { accessToken, refreshToken } = await generateTokens(admin._id);
-    console.log("AccessToken is: ", accessToken);
-    console.log("RefreshToken is: ", refreshToken);
+    console.log("accessToken from the admin is: ",accessToken)
+    console.log("refreshToken  from the admin is: ",refreshToken)
 
     const loggedInAdmin = await Admin.findById(admin._id).select("-password -refreshToken");
     const options = {

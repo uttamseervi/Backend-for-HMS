@@ -9,9 +9,9 @@ const paymentSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User'
     },
-    amount: {
-        type: Number,
-        required: true
+    roomId:{
+        type: Schema.Types.ObjectId,
+        ref: 'Room'
     },
     cardType: {
         type: String,
@@ -32,7 +32,10 @@ const paymentSchema = new Schema({
     cardCvv: {
         type: String,
         required: true,
-    }
+    },
+    
+},{
+    timestamps: true,
 })
 
 const Payment = mongoose.model('Payment', paymentSchema);

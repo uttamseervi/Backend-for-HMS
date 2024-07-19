@@ -4,7 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import { ApiError } from "../utils/apiError.js";
 import { isValidObjectId } from "mongoose";
-// import { generateAccessToken, generateRefreshToken } from "../utils/tokenGenerator.js"; // Import token generation functions
+
 
 const generateTokens = async (userId) => {
     try {
@@ -85,17 +85,64 @@ const loginUser = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, loggedInUser, "User logged in successfully"));
 });
 
-const allocateRoom = asyncHandler(async (req, res) => {
-    const { roomId } = req.params;
-    const user = req.user;
+const allocateRoom = async (req, res) => {
+    try {
+        const { roomId } = req.params;
+        const { checkInTime, checkOutTime } = req.body;
+        const loggedInUserId = req.user._id;
 
-    if (!isValidObjectId(roomId)) {
-        throw new ApiError(400, "Invalid ObjectId format");
+        if (!isValidObjectId(roomId)) {
+            return res.status(400).json({ error: 'Invalid ObjectId format' });
+        }
+
+        const checkIn = new Date(checkInTime);
+        const checkOut = new Date(checkOutTime);
+        if (checkOut <= checkIn || isNaN(checkIn.getTime()) || isNaN(checkOut.getTime())) {
+            throw new ApiError(400, "Invalid date range: checkOutTime must be after checkInTime");
+        }
+
+        const updatedRoom = await Room.findByIdAndUpdate(roomId, {
+            checkInTime: checkIn,
+            checkOutTime: checkOut,
+            allocatedTo: loggedInUserId,
+        }, { new: true });
+
+        if (!updatedRoom) {
+            throw new ApiError(404, "Room not found");
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(loggedInUserId, {
+            allocatedRoom: roomId,
+        }, { new: true });
+
+        if (!updatedUser) {
+            throw new ApiError(404, "User not found");
+        }
+
+        res.status(200).json({ message: 'Room allocated successfully', room: updatedRoom });
+    } catch (error) {
+        console.error('Allocation failed:', error);
+        if (error instanceof ApiError) {
+            res.status(error.statusCode).json({ error: error.message });
+        } else {
+            res.status(500).json({ error: 'Allocation failed' });
+        }
     }
+};
+
+
+const deAllocateRoom = asyncHandler(async (req, res) => {
+    const user = req.user;
 
     const loggedInUser = await User.findById(user._id);
     if (!loggedInUser) {
         throw new ApiError(400, "User not found");
+    }
+
+    const roomId = loggedInUser.allocatedRoom; // Get the room ID allocated to the user
+
+    if (!roomId || !isValidObjectId(roomId)) {
+        throw new ApiError(400, "Invalid Room ID");
     }
 
     const room = await Room.findById(roomId);
@@ -103,14 +150,15 @@ const allocateRoom = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Room not found");
     }
 
-    loggedInUser.allocatedRoom = room._id;
-    room.allocatedTo = loggedInUser._id;
+    loggedInUser.allocatedRoom = null; // Remove allocated room from user
+    room.allocatedTo = null; // Remove user reference from room
 
     await loggedInUser.save();
     await room.save();
 
-    return res.status(200).json(new ApiResponse(200, { loggedInUser, room }, "Room allocated successfully"));
+    return res.status(200).json(new ApiResponse(200, { loggedInUser, room }, "Room deallocated successfully"));
 });
+
 
 const logoutUser = asyncHandler(async (req, res) => {
     const userId = req.user._id;
@@ -148,4 +196,5 @@ const logoutUser = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, user, "User logged out successfully"));
 });
 
-export { createUser, loginUser, logoutUser, allocateRoom };
+
+export { createUser, loginUser, logoutUser, allocateRoom, deAllocateRoom };

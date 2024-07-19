@@ -3,14 +3,16 @@ import Room from "../models/room.models.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import { ApiError } from "../utils/apiError.js";
+import Payment from "../models/payment.models.js";
+import { isValidObjectId } from "mongoose";
 
-const paymentInfo = asyncHandler(async (req, res, next) => {
+const createPayment = asyncHandler(async (req, res, next) => {
+  const { cardType, cardNumber, month, year, cardCvv } = req.body;
   const user = req.user;
-  const loggedInUser = await User.findById(user._id);
-  // Fetch the room details using an aggregation pipeline
+
   const roomDetails = await User.aggregate([
     {
-      $match: { _id: loggedInUser._id }
+      $match: { _id: user._id }
     },
     {
       $lookup: {
@@ -30,47 +32,47 @@ const paymentInfo = asyncHandler(async (req, res, next) => {
     }
   ]);
 
-  // Check if room details were found
   if (!roomDetails || roomDetails.length === 0) {
     throw new ApiError(404, "Failed to fetch room details");
   }
 
   const roomInfo = roomDetails[0].roomInfo;
-  const roomPrice = roomInfo.cost;
+  const cost = roomInfo.cost;
 
-  console.log(roomDetails)
-  console.log("roomInfo", roomInfo);
-  console.log("roomPrice", roomPrice)
-  if (!roomPrice) {
-    throw new ApiError(500, "Failed to fetch the price of the room");
-  }
+  const payment = await Payment.create({
+    user: user._id,
+    roomId: roomInfo._id,
+    amount: cost,
+    cardType: cardType,
+    cardNumber: cardNumber,
+    month: month,
+    year: year,
+    cardCvv: cardCvv
+  });
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, { roomInfo, roomPrice }, "Room price fetched successfully"));
+  if (!payment) throw new ApiError(400, "Payment Failed");
+
+  user.paymentId = payment._id;
+  await user.save();
+
+  roomInfo.paymentId = payment._id;
+  await Room.findByIdAndUpdate(roomInfo._id, { paymentId: payment._id });
+
+  payment.roomId = roomInfo._id;
+  await payment.save();
+
+  const userPayment = await Payment.findById(payment._id).select("-cardCvv -cardNumber");
+
+  return res.status(200).json(new ApiResponse(200, { userPayment, cost, username: user.username }, "Payment processed successfully"));
 });
 
-export {
-  paymentInfo
-};
+const getPaymentInfo = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  if (!userId || !isValidObjectId(userId)) throw new ApiError(400, "Invalid User");
 
-/*
-import User from "../models/user.models.js";
-import Room from "../models/room.models.js";
-import Payment from "../models/payment.models.js"; // Assuming you have a Payment model
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { ApiResponse } from "../utils/apiResponse.js";
-import { ApiError } from "../utils/apiError.js";
-
-const processPayment = asyncHandler(async (req, res, next) => {
-  const user = req.user;
-
-  // Fetch room details including cost using aggregation pipeline
   const roomDetails = await User.aggregate([
     {
-      $match: {
-        _id: user._id // Match the user by _id
-      }
+      $match: { _id: userId }
     },
     {
       $lookup: {
@@ -81,37 +83,27 @@ const processPayment = asyncHandler(async (req, res, next) => {
       }
     },
     {
+      $unwind: "$userRoomDetails"
+    },
+    {
       $addFields: {
-        roomInfo: {
-          $arrayElemAt: ["$userRoomDetails", 0]
-        }
+        roomInfo: "$userRoomDetails"
       }
     }
   ]);
 
-  if (!roomDetails || roomDetails.length === 0) {
-    throw new ApiError(404, "Failed to fetch room details");
-  }
+  
+  const room = roomDetails[0].roomInfo
+  const cost = room.cost;
 
-  const roomInfo = roomDetails[0].roomInfo;
-  const roomPrice = roomInfo.cost;
 
-  if (!roomPrice) {
-    throw new ApiError(500, "Failed to fetch the price of the room");
-  }
+  const payment = await Payment.findOne({ user: userId }).select("-cardCvv -cardNumber");
+  if (!payment) throw new ApiError(400, "Failed to fetch the payment details");
 
-  // Simulate successful payment
-  const payment = await Payment.create({
-    user: user._id,
-    room: roomInfo._id,
-    amount: roomPrice,
-    status: "success", // Simulating a successful payment
-    // Add more fields as needed (e.g., transaction ID, payment method)
-  });
-
-  return res.status(200).json(new ApiResponse(200, payment, "Payment processed successfully"));
+  return res.status(200).json(new ApiResponse(200, { payment, cost }, "Payment details fetched"));
 });
 
-export default processPayment;
-
-*/
+export {
+  createPayment,
+  getPaymentInfo
+};

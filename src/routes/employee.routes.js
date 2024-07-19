@@ -5,9 +5,9 @@ import { verifyAdmin } from "../middlewares/verifyAdmin.js"
 
 const router = Router();
 
-router.route("/add-employee").post(createEmployee);
-router.route("/remove-employee/:employeeId").delete(deleteEmployee)
-router.route("/get-all-employees/:departmentId").get(getAllEmployees)
+router.route("/add-employee").post(verifyAdmin, createEmployee);
+router.route("/remove-employee/:employeeId").delete(verifyAdmin, deleteEmployee)
+router.route("/get-all-employees/:departmentId").get(verifyAdmin, getAllEmployees)
 
 
 

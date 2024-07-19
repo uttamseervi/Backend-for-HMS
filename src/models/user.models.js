@@ -30,6 +30,18 @@ const userSchema = new Schema({
     },
     refreshToken: {
         type: String
+    },
+    checkInTime: {
+        type: String,
+        default: null, // Default value if not set
+    },
+    checkOutTime: {
+        type: String,
+        default: null, // Default value if not set
+    },
+    paymentId: {
+        type: Schema.Types.ObjectId,
+        ref: "Payment"
     }
 }, {
     timestamps: true // Adds createdAt and updatedAt fields

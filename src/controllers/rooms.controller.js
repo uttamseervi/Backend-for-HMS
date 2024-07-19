@@ -10,7 +10,6 @@ const createRoom = asyncHandler(async (req, res) => {
     // the below line is not working please check it later
     // if ([cost, roomImage, title, roomInfo, roomType].some((field) => !field || field.trim() === "")) throw new ApiError(400, "All the fields are compulsory");
     // const existedRoom = await Room.findOne({  });
-    // if (existedRoom) throw new ApiError(400, "Room with this title already exists");
 
     const roomImageLocalPath = req.file?.path
     console.log("Local path of the roomImage is ->", roomImageLocalPath)
@@ -45,17 +44,75 @@ const deleteRoom = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "Room deleted successfully"));
 });
 
+const getPresidentialRooms = asyncHandler(async (req, res) => {
+    const rooms = await Room.find({ roomType: "Presidential Suite" })
+    if (!rooms || rooms.length === 0) throw new ApiError(400, "No rooms found");
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, rooms, "Rooms fetched successfully"));
+
+})
+const getPremiumRooms = asyncHandler(async (req, res) => {
+    const rooms = await Room.find({ roomType: "Premium Room" })
+    if (!rooms || rooms.length === 0) throw new ApiError(400, "No rooms found");
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, rooms, "Rooms fetched successfully"));
+
+})
+const getLuxuryRooms = asyncHandler(async (req, res) => {
+    const rooms = await Room.find({ roomType: "Luxury Suite" })
+    if (!rooms || rooms.length === 0) throw new ApiError(400, "No rooms found");
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, rooms, "Rooms fetched successfully"));
+
+})
+const findRoomById = asyncHandler(async (req, res) => {
+    const { roomId } = req.params;
+    if (!roomId || !mongoose.isValidObjectId(roomId)) throw new ApiError(400, "Invalid ID");
+    const room = await Room.findById(roomId);
+    if (!room) throw new ApiError(400, "Room not found");
+    return res.status(200).json(new ApiResponse(200, room, "Room fetched successfully"));
+
+})
 const getAllRooms = asyncHandler(async (req, res) => {
     const rooms = await Room.find()
     if (!rooms || rooms.length === 0) throw new ApiError(400, "No rooms found");
-    
-    return res
-    .status(200)
-    .json(new ApiResponse(200, rooms, "Rooms fetched successfully"));
+    return res.status(200).json(new ApiResponse(200, rooms, "Rooms fetched successfully"));
 
 })
 
-export { createRoom, deleteRoom,getAllRooms };
+const allocatedRooms = asyncHandler(async (req, res) => {
+    const rooms = await Room.find({ allocatedTo: { $ne: null } });
+    if (!rooms || rooms.length === 0) throw new ApiError(400, "Failed to fetch the allocated rooms");
+    return res
+        .status(200)
+        .json(new ApiResponse(200, rooms, "Allocated rooms fetched successfully"));
+});
+
+const unAllocatedRooms = asyncHandler(async (req, res) => {
+    const rooms = await Room.find({ allocatedTo: null });
+    if (!rooms || rooms.length === 0) throw new ApiError(400, "Failed to fetch the unallocated rooms");
+    return res
+        .status(200)
+        .json(new ApiResponse(200, rooms, "Unallocated rooms fetched successfully"));
+});
+
+export {
+    createRoom,
+    deleteRoom,
+    getPresidentialRooms,
+    getLuxuryRooms,
+    getPremiumRooms,
+    findRoomById,
+    getAllRooms,
+    allocatedRooms,
+    unAllocatedRooms
+};
 
 
 /*

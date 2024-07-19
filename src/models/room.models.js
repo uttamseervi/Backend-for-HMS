@@ -26,12 +26,18 @@ const roomSchema = new Schema({
     },
     checkInTime: {
         type: Date,
-        default: null, // Default value if not set
+        default: null, // Default value if the room is not allocated
     },
     checkOutTime: {
         type: Date,
-        default: null, // Default value if not set
+        default: null, // Default value if the room is not allocated
     },
+    paymentId: {
+        type: Schema.Types.ObjectId,
+        ref: "Payment"
+    },
+
+
 }, {
     timestamps: true // Adds createdAt and updatedAt fields
 });
