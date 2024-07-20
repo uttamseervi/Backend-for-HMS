@@ -12,7 +12,7 @@ const createRoom = asyncHandler(async (req, res) => {
     // const existedRoom = await Room.findOne({  });
 
     const roomImageLocalPath = req.file?.path
-    console.log("Local path of the roomImage is ->", roomImageLocalPath)
+    // console.log("Local path of the roomImage is ->", roomImageLocalPath)
     if (!roomImageLocalPath) throw new ApiError(400, "Failed to fetch the localPath of the image");
 
     const roomImageUrl = await uploadOnCloudinary(roomImageLocalPath)
@@ -106,9 +106,9 @@ const allocatedRooms = asyncHandler(async (req, res) => {
                 $unwind: "$userInfo"
             }
         ]);
-        console.log(rooms)
+        // console.log(rooms)
 
-        if (!rooms || rooms.length === 0) {
+        if (!rooms) {
             throw new ApiError(400, "Failed to fetch the allocated rooms");
         }
 
@@ -116,7 +116,7 @@ const allocatedRooms = asyncHandler(async (req, res) => {
             .status(200)
             .json(new ApiResponse(200, rooms, "Allocated rooms fetched successfully"));
     } catch (error) {
-        console.error(error);
+        // console.error(error);
         return res
             .status(500)
             .json(new ApiResponse(500, null, "An error occurred while fetching allocated rooms"));

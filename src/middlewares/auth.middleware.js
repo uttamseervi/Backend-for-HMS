@@ -5,7 +5,7 @@ import { ApiError } from "../utils/apiError.js";
 export const verifyJwt = async (req, res, next) => {
     try {
         let token = req.cookies?.accessToken || "";
-        console.log("The accessToken is: ", token)
+        // console.log("The accessToken is: ", token)
 
         // Check if token is provided in headers
         if (!token) {

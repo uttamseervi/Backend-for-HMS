@@ -31,7 +31,7 @@ const createEmployee = asyncHandler(async (req, res) => {
 });
 
 const deleteEmployee = asyncHandler(async (req, res) => {
-    const { employeeId } = req.params;
+    const { employeeId } = req.body;
     if (!employeeId || !mongoose.isValidObjectId(employeeId)) throw new ApiError(400, "Invalid employee ID");
 
     const employee = await Employee.findByIdAndDelete(employeeId);
@@ -57,8 +57,8 @@ const assignDepartment = asyncHandler(async (req, res) => {
     if (!employee) {
         throw new ApiError(400, "Employee not found");
     }
-
-    employee.department = departmentName;
+    // might be a bug check it later
+    employee.departmentId = departmentName;
     await employee.save();
 
     return res

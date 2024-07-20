@@ -2,8 +2,8 @@ import mongoose, { Schema } from "mongoose";
 
 const paymentSchema = new Schema({
     cost: {
-        type: Schema.Types.ObjectId,
-        ref: 'Room'
+        type: Number,
+        default:1000
     },
     user: {
         type: Schema.Types.ObjectId,

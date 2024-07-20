@@ -31,6 +31,7 @@ const getAmountInfo = asyncHandler(async (req, res) => {
       $unwind: "$roomInfo"
     }
   ]);
+  
   return res
     .status(200)
     .json(new ApiResponse(200, userRoom, "Fetched the details of the user and room successfully"))
@@ -39,7 +40,7 @@ const getAmountInfo = asyncHandler(async (req, res) => {
 
 
 const createPayment = asyncHandler(async (req, res, next) => {
-  const { cardType, cardNumber, month, year, cardCvv } = req.body;
+  const { cardType, cardNumber, month, year, cardCvv,cost } = req.body;
   const user = req.user;
 
   const roomDetails = await User.aggregate([
@@ -67,14 +68,12 @@ const createPayment = asyncHandler(async (req, res, next) => {
   if (!roomDetails || roomDetails.length === 0) {
     throw new ApiError(404, "Failed to fetch room details");
   }
-
-  const roomInfo = roomDetails[0].roomInfo;
-  const cost = roomInfo.cost;
-
+  const room = roomDetails[0].roomInfo
+  // console.log(room)
   const payment = await Payment.create({
     user: user._id,
-    roomId: roomInfo._id,
-    amount: cost,
+    roomId: room._id,
+    cost,
     cardType: cardType,
     cardNumber: cardNumber,
     month: month,
@@ -87,10 +86,10 @@ const createPayment = asyncHandler(async (req, res, next) => {
   user.paymentId = payment._id;
   await user.save();
 
-  roomInfo.paymentId = payment._id;
-  await Room.findByIdAndUpdate(roomInfo._id, { paymentId: payment._id });
+  room.paymentId = payment._id;
+  await Room.findByIdAndUpdate(room._id, { paymentId: payment._id });
 
-  payment.roomId = roomInfo._id;
+  payment.roomId = room._id;
   await payment.save();
 
   const userPayment = await Payment.findById(payment._id).select("-cardCvv -cardNumber");

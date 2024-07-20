@@ -10,10 +10,8 @@ const verifyAdmin = async (req, res, next) => {
         if (req.cookies && req.cookies.accessToken) {
             token = req.cookies.accessToken;
         } else if (req.header("Authorization")) {
-            // Extract token from Authorization header
             const authHeader = req.header("Authorization");
 
-            // Ensure the header is in the correct format
             if (!authHeader.startsWith("Bearer ")) {
                 throw new ApiError(400, "Invalid Authorization header format");
             }

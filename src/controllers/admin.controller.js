@@ -32,8 +32,8 @@ const createAdmin = asyncHandler(async (req, res) => {
     if (!admin) throw new ApiError(400, "Failed to create the admin");
 
     const { accessToken, refreshToken } = await generateTokens(admin._id);
-    console.log("accessToken from the admin is: ",accessToken)
-    console.log("refreshToken  from the admin is: ",refreshToken)
+    // console.log("accessToken from the admin is: ",accessToken)
+    // console.log("refreshToken  from the admin is: ",refreshToken)
 
 
     const createdAdmin = await Admin.findById(admin._id).select("-password -refreshToken");
@@ -63,8 +63,8 @@ const loginAdmin = asyncHandler(async (req, res) => {
     if (!isPasswordValid) throw new ApiError(400, "Password is Incorrect");
 
     const { accessToken, refreshToken } = await generateTokens(admin._id);
-    console.log("accessToken from the admin is: ",accessToken)
-    console.log("refreshToken  from the admin is: ",refreshToken)
+    // console.log("accessToken from the admin is: ",accessToken)
+    // console.log("refreshToken  from the admin is: ",refreshToken)
 
     const loggedInAdmin = await Admin.findById(admin._id).select("-password -refreshToken");
     const options = {
