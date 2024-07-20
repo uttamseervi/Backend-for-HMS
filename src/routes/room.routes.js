@@ -24,7 +24,7 @@ router.route("/get-room/:roomId").get(findRoomById)
 router.route("/get-all-rooms").get(verifyAdmin, getAllRooms)
 router.route("/get-allocated-rooms").get(verifyAdmin, allocatedRooms)
 router.route("/get-unallocated-room").get(verifyAdmin, unAllocatedRooms)
-router.route("/delete/:roomId").delete(verifyAdmin, deleteRoom);
+router.route("/").delete(verifyAdmin, deleteRoom);
 
 
 export default router;

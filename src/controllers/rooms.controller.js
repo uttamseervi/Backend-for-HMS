@@ -33,10 +33,10 @@ const createRoom = asyncHandler(async (req, res) => {
 });
 
 const deleteRoom = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    if (!id || !mongoose.isValidObjectId(id)) throw new ApiError(400, "Invalid ID");
+    const { roomId } = req.body;
+    if (!roomId || !mongoose.isValidObjectId(roomId)) throw new ApiError(400, "Invalid ID");
 
-    const room = await Room.findByIdAndDelete(id);
+    const room = await Room.findByIdAndDelete(roomId);
     if (!room) throw new ApiError(400, "Room not found");
 
     return res
