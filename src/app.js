@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: true, limit: '16kb' }));
 app.use(express.static('public'));
 app.use(cookieParser());
 
-// importing the routes
+
 import userRoutes from "./routes/user.routes.js"
 import reviewRouter from "./routes/review.routes.js"
 import contactRoutes from "./routes/contact.routes.js"
@@ -25,7 +25,8 @@ import adminRoutes from "./routes/admin.routes.js"
 import paymentRoutes from "./routes/payment.routes.js"
 
 
-// using these routes
+
+
 app.use("/api/v1/users", userRoutes)
 app.use("/api/v1/contact", contactRoutes)
 app.use("/api/v1/review", reviewRouter)
@@ -33,8 +34,6 @@ app.use("/api/v1/admin", adminRoutes)
 app.use("/api/v1/department", departmentRoutes)
 app.use("/api/v1/employee", employeeRoutes)
 app.use("/api/v1/payment", paymentRoutes)
-
-// testing is pending from here 
 app.use("/api/v1/rooms", roomRoutes)
 
 
