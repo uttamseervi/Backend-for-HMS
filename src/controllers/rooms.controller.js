@@ -45,7 +45,7 @@ const deleteRoom = asyncHandler(async (req, res) => {
 });
 
 const getPresidentialRooms = asyncHandler(async (req, res) => {
-    const rooms = await Room.find({ roomType: "Presidential Suite" })
+    const rooms = await Room.find({ roomType: "Presidential Suite", allocatedTo: null })
     if (!rooms || rooms.length === 0) throw new ApiError(400, "No rooms found");
 
     return res
@@ -54,7 +54,7 @@ const getPresidentialRooms = asyncHandler(async (req, res) => {
 
 })
 const getPremiumRooms = asyncHandler(async (req, res) => {
-    const rooms = await Room.find({ roomType: "Premium Room" })
+    const rooms = await Room.find({ roomType: "Premium Room", allocatedTo: null })
     if (!rooms || rooms.length === 0) throw new ApiError(400, "No rooms found");
 
     return res
@@ -63,7 +63,7 @@ const getPremiumRooms = asyncHandler(async (req, res) => {
 
 })
 const getLuxuryRooms = asyncHandler(async (req, res) => {
-    const rooms = await Room.find({ roomType: "Luxury Suite" })
+    const rooms = await Room.find({ roomType: "Luxury Suite", allocatedTo: null })
     if (!rooms || rooms.length === 0) throw new ApiError(400, "No rooms found");
 
     return res
@@ -92,7 +92,7 @@ const allocatedRooms = asyncHandler(async (req, res) => {
     try {
         const rooms = await Room.aggregate([
             {
-                $match: { allocatedTo: { $ne: null } } 
+                $match: { allocatedTo: { $ne: null } }
             },
             {
                 $lookup: {
