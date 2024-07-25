@@ -31,7 +31,7 @@ const getAmountInfo = asyncHandler(async (req, res) => {
       $unwind: "$roomInfo"
     }
   ]);
-  
+
   return res
     .status(200)
     .json(new ApiResponse(200, userRoom, "Fetched the details of the user and room successfully"))
@@ -40,7 +40,7 @@ const getAmountInfo = asyncHandler(async (req, res) => {
 
 
 const createPayment = asyncHandler(async (req, res, next) => {
-  const { cardType, cardNumber, month, year, cardCvv,cost } = req.body;
+  const { cardType, cardNumber, month, year, cardCvv, cost } = req.body;
   const user = req.user;
 
   const roomDetails = await User.aggregate([
@@ -99,6 +99,7 @@ const createPayment = asyncHandler(async (req, res, next) => {
 
 const getPaymentInfo = asyncHandler(async (req, res) => {
   const userId = req.user._id;
+  const { roomId } = req.params;
   if (!userId || !isValidObjectId(userId)) throw new ApiError(400, "Invalid User");
 
   const roomDetails = await User.aggregate([
@@ -125,10 +126,11 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
 
 
   const room = roomDetails[0].roomInfo
+  console.log(room)
   const cost = room.cost;
 
 
-  const payment = await Payment.findOne({ user: userId }).select("-cardCvv -cardNumber");
+  const payment = await Payment.findOne({ user: userId, roomId: roomId }).sort({ createdAt: -1 }).select("-cardCvv -cardNumber");
   if (!payment) throw new ApiError(400, "Failed to fetch the payment details");
 
   return res.status(200).json(new ApiResponse(200, { payment, cost }, "Payment details fetched"));

@@ -8,7 +8,7 @@ import { verifyJwt } from "../middlewares/auth.middleware.js"
 const router = Router();
 // router.route("/user-payment").post(verifyJwt, paymentInfo)
 router.route("/pay").post(verifyJwt, createPayment)
-router.route("/paymentInfo").get(verifyJwt, getPaymentInfo)
+router.route("/paymentInfo/:roomId").get(verifyJwt, getPaymentInfo)
 router.route("/amountInfo").get(verifyJwt, getAmountInfo)
 
 export default router
