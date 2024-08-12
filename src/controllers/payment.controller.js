@@ -126,7 +126,7 @@ const getPaymentInfo = asyncHandler(async (req, res) => {
 
 
   const room = roomDetails[0].roomInfo
-  console.log(room)
+  // console.log(room)
   const cost = room.cost;
 
 
