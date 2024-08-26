@@ -15,14 +15,14 @@ app.use(express.static('public'));
 app.use(cookieParser());
 
 
-import userRoutes from "../api/routes/user.routes.js"
-import reviewRouter from "../api/routes/review.routes.js"
-import contactRoutes from "../api/routes/contact.routes.js"
-import roomRoutes from "../api/routes/room.routes.js"
-import departmentRoutes from "../api/routes/department.routes.js"
-import employeeRoutes from "../api/routes/employee.routes.js"
-import adminRoutes from "../api/routes/admin.routes.js"
-import paymentRoutes from "../api/routes/payment.routes.js"
+import userRoutes from "./routes/user.routes.js"
+import reviewRouter from "./routes/review.routes.js"
+import contactRoutes from "./routes/contact.routes.js"
+import roomRoutes from "./routes/room.routes.js"
+import departmentRoutes from "./routes/department.routes.js"
+import employeeRoutes from "./routes/employee.routes.js"
+import adminRoutes from "./routes/admin.routes.js"
+import paymentRoutes from "./routes/payment.routes.js"
 
 
 
